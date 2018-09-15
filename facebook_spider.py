@@ -13,6 +13,7 @@ LIB_DIR = ROOT_DIR + "/lib"
 CHROME_PROFILE = ROOT_DIR + "/ChromeProfile/Profile"
 FACEBOOK_LOGIN_URL = "https://www.facebook.com/login.php"
 FB_URL_LIKERS = "https://www.facebook.com/search/{page_id}/likers"
+FB_USER_PAGE_URL = "https://www.facebook.com/profile.php?id={fb_id}"
 
 class FacebookSpider(object):
 
@@ -86,4 +87,17 @@ class FacebookSpider(object):
             for ele in elements:
                 about_categories.append(ele.text)
         return about_categories
+
+    def get_user_profile_page(self, fb_id):
+        self.driver.get(FB_USER_PAGE_URL.format(fb_id=fb_id))
+        time.sleep(2)
+        about = []
+        ava_ele = self.driver.find_element_by_xpath('//a[contains(@class, "profilePicThumb")]/img')
+        avatar_url = ava_ele.get_attribute('src')
+        name = self.driver.find_element_by_xpath('//span[@id="fb-timeline-cover-name"]/a').text
+        about_eles = self.driver.find_elements_by_xpath('//div[@id="intro_container_id"]//div[contains(@class, "textContent")]')
+        for ele in about_eles:
+            es = ele.find_elements_by_xpath("./div//text()")
+            about.append(" ".join([e.text for e in es]))
+        return {'name': name, 'avatar_url': avatar_url, 'about': about}
 
